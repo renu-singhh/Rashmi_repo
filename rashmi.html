@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Devank's Journey - Growing Up Beautiful</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&family=Pacifico&family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        html, body {
+            font-family: 'Poppins', sans-serif;
+            height: 100vh;
+            overflow: hidden;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        }
+
+        .app-container {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .hearts-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+            overflow: hidden;
+        }
+
+        .heart {
+            position: absolute;
+            animation: fallHeart 3s ease-out forwards;
+            opacity: 0;
+        }
+
+        @keyframes fallHeart {
+            0% { transform: translateY(-50px) scale(0) rotate(0deg); opacity: 0; }
+            15% { opacity: 1; transform: translateY(10vh) scale(1.2) rotate(20deg); }
+            85% { opacity: 1; }
+            100% { transform: translateY(100vh) scale(0.5) rotate(360deg); opacity: 0; }
+        }
+
+        .header {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #E8B4B8, #EED6D3, #F5E6E8);
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        .baby-name {
+            font-family: 'Pacifico', cursive;
+            font-size: 1.8rem;
+            color: #A67B5B;
+            text-shadow: 2px 2px 8px rgba(166,123,91,0.3);
+            cursor: pointer;
+            display: inline-block;
+            transition: all 0.3s ease;
+        }
+
+        .baby-name:hover {
+            transform: scale(1.1);
+            text-shadow: 0 0 30px rgba(232,180,184,0.8);
+            color: #8B5A2B;
+        }
+
+        /* Year selector */
+        .year-nav {
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+            padding: 8px 10px;
+            background: linear-gradient(135deg, #FFF8F0, #FFF5EB);
+            flex-wrap: wrap;
+            flex-shrink: 0;
+        }
+
+        .year-btn {
+            padding: 6px 12px;
+            border-radius: 20px;
+            border: 2px solid #D4A574;
+            background: #FFF8F0;
+            color: #A67B5B;
+            font-weight: 700;
+            font-size: 0.7rem;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .year-btn:hover, .year-btn.active {
+            background: linear-gradient(135deg, #E8B4B8, #D4A574);
+            color: #fff;
+            transform: scale(1.1);
+            box-shadow: 0 4px 15px rgba(212,165,116,0.4);
+        }
+
+        /* Month selector */
+        .month-nav {
+            display: flex;
+            justify-content: center;
+            gap: 4px;
+            padding: 6px 10px;
+            background: rgba(255,255,255,0.9);
+            flex-wrap: wrap;
+            flex-shrink: 0;
+        }
+
+        .month-btn {
+            width: 28px; height: 28px;
+            border-radius: 50%;
+            border: 2px solid #D4A574;
+            background: #FFF8F0;
+            color: #A67B5B;
+            font-weight: 700;
+            font-size: 0.65rem;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .month-btn:hover, .month-btn.active {
+            background: linear-gradient(135deg, #E8B4B8, #D4A574);
+            color: #fff;
+            transform: scale(1.15);
+            box-shadow: 0 3px 12px rgba(212,165,116,0.4);
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+            min-height: 0;
+        }
+
+        .month-page {
+            display: none;
+            width: 100%;
+            height: 100%;
+            animation: pageIn 0.5s ease;
+        }
+
+        .month-page.active { display: block; }
+
+        @keyframes pageIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* Desktop Layout */
+        .page-wrapper {
+            width: 100%;
+            height: 100%;
+            display: grid;
+            grid-template-columns: 1.3fr 1.4fr 1.3fr;
+            grid-template-rows: 1fr 1fr;
+            gap: 12px;
+            padding: 12px;
+        }
+
+        .photo-slot {
+            border-radius: 16px;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            background: rgba(255,255,255,0.25);
+            box-shadow: 0 8px 28px rgba(166,123,91,0.2);
+            backdrop-filter: blur(4px);
+            min-height: 180px;
+        }
+
+        .photo-slot:hover {
+            transform: scale(1.02);
+            z-index: 10;
+            box-shadow: 0 12px 35px rgba(166,123,91,0.25);
+        }
+
+        .photo-area {
+            flex: 1;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            min-height: 0;
+        }
+
+        .photo-area input[type="file"] {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        .photo-area .camera-icon {
+            font-size: 2.5rem;
+            opacity: 0.9;
+        }
+
+        .photo-area .add-text {
+            color: #5D4037;
+            font-weight: 700;
+            font-size: 0.7rem;
+            text-shadow: 1px 1px 3px rgba(255,255,255,0.5);
+            margin-top: 6px;
+        }
+
+        .photo-area img {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 5;
+        }
+
+        .photo-slot .remove-btn {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            width: 24px;
+            height: 24px;
+            background: rgba(183,110,121,0.9);
+            border: none;
+            border-radius: 50%;
+            color: #fff;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 25;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .photo-slot:hover .remove-btn { opacity: 1; }
+
+        .photo-badge {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            background: rgba(93,64,55,0.85);
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.55rem;
+            color: #fff;
+            z-index: 15;
+            font-weight: 700;
+        }
+
+        .comment-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(139,90,43,0.95));
+            padding: 20px 8px 8px;
+            z-index: 20;
+            opacity: 0;
+            transform: translateY(100%);
+            transition: all 0.3s ease;
+        }
+
+        .photo-slot:hover .comment-overlay {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .comment-input {
+            width: 100%;
+            background: rgba(255,248,240,0.25);
+            border: 2px solid rgba(255,248,240,0.5);
+            border-radius: 10px;
+            padding: 6px 8px;
+            color: #fff;
+            font-size: 0.55rem;
+            font-family: 'Poppins', sans-serif;
+            resize: none;
+            transition: all 0.3s ease;
+        }
+
+        .comment-input::placeholder { color: rgba(255,255,255,0.8); }
+        .comment-input:focus { 
+            outline: none; 
+            border-color: #FFF8F0;
+            background: rgba(255,248,240,0.35);
+        }
+
+        .saved-comment {
+            background: rgba(93,64,55,0.7);
+            padding: 6px 10px;
+            font-size: 0.55rem;
+            color: #fff;
+            text-align: center;
+            min-height: 26px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0 0 16px 16px;
+            font-style: italic;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .saved-comment.empty { opacity: 0.6; }
+        .photo-slot:hover .saved-comment { opacity: 0; }
+
+        /* Center content */
+        .center-content {
+            grid-column: 2;
+            grid-row: 1 / 3;
+            border-radius: 20px;
+            position: relative;
+            overflow: hidden;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            text-align: center;
+            padding: 12px 10px;
+            color: #3E2723;
+            background: rgba(255,255,255,0.35);
+            backdrop-filter: blur(10px);
+        }
+
+        .center-content::-webkit-scrollbar { width: 3px; }
+        .center-content::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.3);
+            border-radius: 3px;
+        }
+
+        .center-content::before {
+            content: '';
+            position: absolute;
+            top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 50%);
+            animation: shimmerGlow 6s infinite linear;
+        }
+
+        @keyframes shimmerGlow {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .age-display {
+            font-size: 0.65rem;
+            color: #5D4037;
+            font-weight: 600;
+            margin-bottom: 2px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .month-number {
+            font-size: 2.8rem;
+            font-weight: 800;
+            color: #4E342E;
+            text-shadow: 2px 2px 10px rgba(78,52,46,0.2);
+            line-height: 1;
+            position: relative;
+            z-index: 1;
+        }
+
+        .month-icon {
+            font-size: 1.8rem;
+            margin: 4px 0;
+            animation: bounce 2s infinite;
+            position: relative;
+            z-index: 1;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        .month-title {
+            font-family: 'Dancing Script', cursive;
+            font-size: 1.3rem;
+            color: #5D4037;
+            text-shadow: 2px 2px 6px rgba(93,64,55,0.15);
+            margin-bottom: 6px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .growth-message {
+            font-size: 0.6rem;
+            line-height: 1.5;
+            color: #4E342E;
+            font-weight: 500;
+            position: relative;
+            z-index: 1;
+            max-width: 95%;
+            margin-bottom: 8px;
+            text-align: justify;
+            text-align-last: center;
+        }
+
+        .milestones {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 3px;
+            position: relative;
+            z-index: 1;
+            margin-bottom: 8px;
+        }
+
+        .milestone {
+            background: rgba(93,64,55,0.25);
+            padding: 3px 10px;
+            border-radius: 10px;
+            font-size: 0.5rem;
+            font-weight: 700;
+            color: #4E342E;
+        }
+
+        .center-message-area {
+            width: 100%;
+            position: relative;
+            z-index: 1;
+            margin-top: auto;
+            padding-top: 6px;
+            border-top: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .center-message-label {
+            font-size: 0.55rem;
+            color: #5D4037;
+            font-weight: 600;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+
+        .center-message-input {
+            width: 100%;
+            background: rgba(93,64,55,0.1);
+            border: 2px solid rgba(93,64,55,0.3);
+            border-radius: 10px;
+            padding: 8px 10px;
+            color: #3E2723;
+            font-size: 0.55rem;
+            font-family: 'Poppins', sans-serif;
+            resize: none;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .center-message-input::placeholder { color: rgba(93,64,55,0.6); }
+        .center-message-input:focus { 
+            outline: none; 
+            border-color: rgba(93,64,55,0.5);
+            background: rgba(93,64,55,0.15);
+        }
+
+        .saved-center-message {
+            font-size: 0.55rem;
+            font-style: italic;
+            color: #4E342E;
+            font-weight: 500;
+            padding: 8px;
+            background: rgba(93,64,55,0.1);
+            border-radius: 8px;
+            margin-top: 4px;
+            min-height: 26px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .sparkle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #fff;
+            border-radius: 50%;
+            animation: sparkle 2s infinite;
+            z-index: 2;
+        }
+
+        @keyframes sparkle {
+            0%, 100% { opacity: 0; transform: scale(0); }
+            50% { opacity: 1; transform: scale(1); }
+        }
+
+        /* Theme colors - warm eye-friendly */
+        .theme-1 { background: linear-gradient(135deg, #E8B4B8, #D4A5A5); }
+        .theme-2 { background: linear-gradient(135deg, #C9B1FF, #B8A5E3); }
+        .theme-3 { background: linear-gradient(135deg, #FFE5B4, #F5D0A9); }
+        .theme-4 { background: linear-gradient(135deg, #B5D8C7, #A8D0BA); }
+        .theme-5 { background: linear-gradient(135deg, #A7C7E7, #9BB8D9); }
+        .theme-6 { background: linear-gradient(135deg, #F4B8B8, #E8A5A5); }
+        .theme-7 { background: linear-gradient(135deg, #87CEEB, #7EC8E3); }
+        .theme-8 { background: linear-gradient(135deg, #98D8C8, #8BCFBD); }
+        .theme-9 { background: linear-gradient(135deg, #FFDAB9, #F5C9A0); }
+        .theme-10 { background: linear-gradient(135deg, #DDA0DD, #D19FD0); }
+        .theme-11 { background: linear-gradient(135deg, #FFB6C1, #F5A5B0); }
+        .theme-12 { background: linear-gradient(135deg, #F0E68C, #E8DBA0); }
+
+        .footer {
+            padding: 6px;
+            text-align: center;
+            background: linear-gradient(135deg, #E8B4B8, #EED6D3);
+            color: #8B5A2B;
+            font-size: 0.6rem;
+            flex-shrink: 0;
+        }
+
+        .footer-hearts {
+            font-size: 0.85rem;
+            letter-spacing: 4px;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .header { padding: 8px 15px; }
+            .baby-name { font-size: 1.4rem; }
+            
+            .year-nav { padding: 6px 8px; gap: 4px; }
+            .year-btn { padding: 4px 8px; font-size: 0.6rem; }
+            
+            .month-nav { padding: 5px 8px; gap: 3px; }
+            .month-btn { width: 24px; height: 24px; font-size: 0.55rem; }
+            
+            .page-wrapper {
+                grid-template-columns: 1fr 1fr;
+                grid-template-rows: auto 1fr 1fr;
+                gap: 10px;
+                padding: 10px;
+            }
+            
+            .center-content {
+                grid-column: 1 / 3;
+                grid-row: 1;
+                max-height: 35vh;
+            }
+            
+            .photo-slot { min-height: 150px; }
+            .photo-slot:nth-child(1) { grid-column: 1; grid-row: 2; }
+            .photo-slot:nth-child(2) { grid-column: 2; grid-row: 2; }
+            .photo-slot:nth-child(3) { grid-column: 1; grid-row: 3; }
+            .photo-slot:nth-child(4) { grid-column: 2; grid-row: 3; }
+            
+            .month-number { font-size: 2.2rem; }
+            .month-icon { font-size: 1.5rem; }
+            .month-title { font-size: 1.1rem; }
+            .growth-message { font-size: 0.55rem; }
+            .milestone { font-size: 0.45rem; padding: 3px 8px; }
+            
+            .photo-area .camera-icon { font-size: 2rem; }
+            .photo-area .add-text { font-size: 0.6rem; }
+            .photo-badge { font-size: 0.5rem; padding: 3px 8px; }
+            .saved-comment { font-size: 0.5rem; min-height: 22px; }
+            
+            .footer { padding: 5px; }
+            .footer-hearts { font-size: 0.75rem; }
+        }
+
+        @media (max-width: 480px) {
+            .baby-name { font-size: 1.2rem; }
+            .year-btn { padding: 3px 6px; font-size: 0.55rem; }
+            .month-btn { width: 22px; height: 22px; font-size: 0.5rem; }
+            
+            .page-wrapper { gap: 8px; padding: 8px; }
+            .center-content { max-height: 30vh; padding: 8px; }
+            .photo-slot { min-height: 130px; }
+            
+            .month-number { font-size: 1.8rem; }
+            .month-icon { font-size: 1.3rem; }
+            .month-title { font-size: 0.95rem; }
+            .growth-message { font-size: 0.5rem; line-height: 1.4; }
+            
+            .photo-area .camera-icon { font-size: 1.8rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="hearts-overlay" id="heartsOverlay"></div>
+        <header class="header">
+            <h1 class="baby-name" onclick="triggerHearts()">🌸 Devank 🌸</h1>
+        </header>
+        <nav class="year-nav" id="yearNav"></nav>
+        <nav class="month-nav" id="monthNav"></nav>
+        <main class="main-content" id="mainContent"></main>
+        <footer class="footer">
+            <div class="footer-hearts">💕 🧸 💖 🧸 💕</div>
+        </footer>
+    </div>
+
+    <script>
+        // Generate data for 20 years (240 months)
+        const yearlyThemes = {
+            1: ["theme-1", "theme-2", "theme-3", "theme-4", "theme-5", "theme-6", "theme-7", "theme-8", "theme-9", "theme-10", "theme-11", "theme-12"],
+            2: ["theme-4", "theme-5", "theme-6", "theme-1", "theme-2", "theme-3", "theme-10", "theme-11", "theme-12", "theme-7", "theme-8", "theme-9"],
+            3: ["theme-7", "theme-8", "theme-9", "theme-10", "theme-11", "theme-12", "theme-1", "theme-2", "theme-3", "theme-4", "theme-5", "theme-6"]
+        };
+
+        const icons = ["👶", "😊", "💪", "🔍", "🌀", "🎂", "⭐", "🚀", "🐾", "🌟", "🎈", "🎉", "🎨", "📚", "🎭", "🎪", "🎸", "⚽", "🏆", "🎓"];
+        
+        const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+        function generateMonthData(year, month) {
+            const totalMonth = (year - 1) * 12 + month;
+            const themeIndex = (totalMonth - 1) % 12;
+            const themeSet = yearlyThemes[((year - 1) % 3) + 1];
+            
+            let title, growth, milestones, icon;
+            
+            if (year === 1) {
+                // First year - baby milestones
+                const year1Data = [
+                    { title: "Hello World, Little Prince!", icon: "👶", growth: "Welcome to the world, my precious little angel! The moment you arrived, our hearts expanded in ways we never knew possible. You sleep like a tiny dream, all curled up so perfectly. Every breath you take fills our home with pure magic and wonder. Those tiny yawns are the most adorable things we've ever seen!", milestones: ["First breath", "Tiny yawns", "First cuddles", "Grasping reflex", "Mama's voice"] },
+                    { title: "Your First Magical Smiles!", icon: "😊", growth: "Your first real smile melted our hearts into a million pieces! Those gummy grins are pure sunshine on any cloudy day. You've started cooing and making the sweetest sounds. Watching you discover the world with those big curious eyes is absolutely magical!", milestones: ["First smile!", "Coos & gurgles", "Tracks faces", "Head lifting", "Social baby"] },
+                    { title: "Growing Stronger Every Day!", icon: "💪", growth: "Look at you getting stronger every single day! Tummy time is your new adventure zone. Your giggles are the most beautiful sound in the universe! You're reaching for toys now and discovering your adorable little hands!", milestones: ["Head control", "First laughs", "Reaches toys", "Pushes up", "Babbles more"] },
+                    { title: "Our Little Explorer!", icon: "🔍", growth: "Everything is SO fascinating to you now! Your eyes light up with wonder at every discovery. Peek-a-boo is your favorite game, and those belly laughs are everything! Rolling is becoming your new superpower!", milestones: ["Grabs toys", "Belly laughs", "Rolls over", "Peek-a-boo fan", "Curious eyes"] },
+                    { title: "On The Move, Little One!", icon: "🌀", growth: "Rolling, rolling, rolling - you just cannot stay still! Those excited leg kicks when you see us are the best greeting ever! You're sitting with help now and showing off your strong personality!", milestones: ["Rolls both ways", "Sits with help", "Leg kicks", "Knows family", "Squeals of joy"] },
+                    { title: "Happy Half Birthday!", icon: "🎂", growth: "Half a year of pure love! First foods adventure begins - such funny faces! You might be sprouting your first tooth. Sitting up like a big kid now. Here's to six more amazing months!", milestones: ["First foods!", "First tooth?", "Sits alone", "Responds to name", "6 months!"] },
+                    { title: "Sitting Pretty Like Royalty!", icon: "⭐", growth: "Look at you sitting like royalty! Your hands clap with joy when music plays. Ba-ba and ma-ma sounds are music to our ears! You're investigating everything like a tiny scientist!", milestones: ["Sits alone!", "Claps hands", "Says ba-ba", "Loves music", "Little scientist"] },
+                    { title: "Adventure Time Begins!", icon: "🚀", growth: "Crawling adventures have begun! You pull yourself up to stand looking so proud! Those little waves of bye-bye melt hearts everywhere. Our fearless adventurer is on the move!", milestones: ["Crawling!", "Pulls to stand", "Waves bye-bye", "Points at things", "Fearless baby"] },
+                    { title: "Speed Crawler Champion!", icon: "🐾", growth: "Zoom zoom! You're a crawling champion now! You understand so much more than we realize. Copying everything we do like an adorable mirror. Walking is coming soon!", milestones: ["Speed crawler", "Understands words", "Copies us", "Cruises furniture", "Almost walking"] },
+                    { title: "Standing Tall and Proud!", icon: "🌟", growth: "Standing so tall and proud! Those wobbly first steps are coming any day! You're feeding yourself now. Your first real words are emerging. Double digits look amazing on you!", milestones: ["Stands alone!", "Almost walking", "Feeds self", "First words", "10 months!"] },
+                    { title: "Almost ONE, Little Star!", icon: "🎈", growth: "Just one month until your first birthday! Walking with help and getting braver every day. Your personality shines so bright. The countdown to ONE begins!", milestones: ["Walking soon!", "Big personality", "Follows commands", "Best hugs", "Almost ONE!"] },
+                    { title: "Happy 1st Birthday!", icon: "🎉", growth: "HAPPY 1ST BIRTHDAY! What an incredible journey from tiny newborn to this amazing little person. Every moment has been pure magic. You've filled our lives with more love than we ever knew possible!", milestones: ["ONE YEAR OLD!", "Walking star", "First words", "Full of love", "Best year!"] }
+                ];
+                const data = year1Data[month - 1];
+                return { ...data, theme: themeSet[themeIndex] };
+            } else if (year === 2) {
+                const titles = ["Toddler Adventures Begin!", "Exploring Everything!", "Words Are Forming!", "Running Around!", "Climbing Master!", "Two Year Countdown!", "Little Helper!", "Curious Mind!", "Growing Independence!", "So Many Words!", "Almost Two!", "Happy 2nd Birthday!"];
+                const growths = [
+                    "Walking is getting steadier every day! You're exploring every corner with such determination. Your vocabulary is growing and every new word melts our hearts!",
+                    "The world is your playground now! You're pointing at everything wanting to know its name. Your curiosity is absolutely endless and beautiful!",
+                    "So many words coming out now! You're putting two words together and it's amazing. Your personality shines brighter every single day!",
+                    "Running is your new favorite thing! You zoom around with so much energy. Playing with other kids is becoming so much fun for you!",
+                    "Climbing everything in sight! You're fearless and determined. Your independence is growing and we're so proud of you!",
+                    "Half way to two! You're singing songs and dancing around. Your imagination is starting to blossom beautifully!",
+                    "Such a helpful little one! You want to do everything yourself. Your determination inspires us every day!",
+                    "Questions are starting! Why is becoming your favorite word. Your mind is expanding so rapidly!",
+                    "More independent every day! You have your own opinions and aren't afraid to share them. Growing up so beautifully!",
+                    "Your vocabulary is exploding! Full sentences are coming together. Conversations with you are so precious!",
+                    "Almost two years old! You're a running, talking, amazing little person. Time has flown by so fast!",
+                    "HAPPY 2ND BIRTHDAY! From baby to toddler to this incredible little person. Two years of pure joy and love!"
+                ];
+                return {
+                    title: titles[month - 1],
+                    icon: icons[(month - 1) % icons.length],
+                    growth: growths[month - 1],
+                    milestones: ["Growing fast", "Learning daily", "So curious", "Full of energy", "Pure joy"],
+                    theme: themeSet[themeIndex]
+                };
+            } else {
+                // Years 3-20
+                const ageTitle = year <= 5 ? "Little " : year <= 10 ? "Growing " : year <= 15 ? "Amazing " : "Wonderful ";
+                const titles = [
+                    `${ageTitle}January Adventures!`, `${ageTitle}February Fun!`, `${ageTitle}March Memories!`,
+                    `${ageTitle}April Adventures!`, `${ageTitle}May Magic!`, `${ageTitle}June Joy!`,
+                    `${ageTitle}July Journeys!`, `${ageTitle}August Adventures!`, `${ageTitle}September Stories!`,
+                    `${ageTitle}October Memories!`, `${ageTitle}November Notes!`, `Happy ${year}${year === 3 ? 'rd' : 'th'} Birthday!`
+                ];
+                
+                let growthText;
+                if (year <= 5) {
+                    growthText = `At ${year} years and ${month} months, you continue to amaze us every day! Your imagination is incredible, your kindness touches everyone around you, and your laughter fills our home with joy. Every day with you is a beautiful adventure. We are so blessed to watch you grow into such a wonderful little person!`;
+                } else if (year <= 10) {
+                    growthText = `Year ${year}, month ${month} - watching you grow is the greatest privilege! You're learning so much, making wonderful friends, and developing amazing talents. Your curiosity about the world inspires us. Keep reaching for the stars, our amazing child!`;
+                } else if (year <= 15) {
+                    growthText = `${year} years and ${month} months of watching you become an incredible person! Your kindness, intelligence, and spirit continue to amaze us. The young person you're becoming fills us with such pride. We believe in you and all your dreams!`;
+                } else {
+                    growthText = `At ${year} years old, you've grown into such a remarkable person! Your journey from that tiny baby to this amazing individual has been the greatest joy of our lives. Whatever path you choose, know that you are loved beyond measure. The world is yours to explore!`;
+                }
+
+                const yearMilestones = year <= 5 
+                    ? ["Learning lots", "Making friends", "Creative play", "Growing strong", "Pure happiness"]
+                    : year <= 10 
+                    ? ["School adventures", "New skills", "Best friends", "Amazing growth", "Bright future"]
+                    : year <= 15
+                    ? ["Teen years", "Finding yourself", "Big dreams", "Growing wisdom", "Endless potential"]
+                    : ["Young adult", "Own path", "Big decisions", "Bright future", "Always loved"];
+
+                return {
+                    title: titles[month - 1],
+                    icon: icons[(year + month - 1) % icons.length],
+                    growth: growthText,
+                    milestones: yearMilestones,
+                    theme: themeSet[themeIndex]
+                };
+            }
+        }
+
+        const cameras = ['📸', '📷', '🖼️', '💫'];
+        let currentYear = 1;
+        let currentMonth = 1;
+
+        // Create year navigation
+        const yearNav = document.getElementById('yearNav');
+        for (let y = 1; y <= 20; y++) {
+            const btn = document.createElement('button');
+            btn.className = 'year-btn' + (y === 1 ? ' active' : '');
+            btn.textContent = 'Year ' + y;
+            btn.onclick = () => selectYear(y);
+            yearNav.appendChild(btn);
+        }
+
+        // Create month navigation
+        const monthNav = document.getElementById('monthNav');
+        for (let m = 1; m <= 12; m++) {
+            const btn = document.createElement('button');
+            btn.className = 'month-btn' + (m === 1 ? ' active' : '');
+            btn.textContent = m;
+            btn.onclick = () => selectMonth(m);
+            monthNav.appendChild(btn);
+        }
+
+        function selectYear(year) {
+            currentYear = year;
+            document.querySelectorAll('.year-btn').forEach((btn, i) => btn.classList.toggle('active', i === year - 1));
+            renderCurrentPage();
+            triggerHearts();
+        }
+
+        function selectMonth(month) {
+            currentMonth = month;
+            document.querySelectorAll('.month-btn').forEach((btn, i) => btn.classList.toggle('active', i === month - 1));
+            renderCurrentPage();
+            triggerHearts();
+        }
+
+        function renderCurrentPage() {
+            const mainContent = document.getElementById('mainContent');
+            const data = generateMonthData(currentYear, currentMonth);
+            const pageId = `page-${currentYear}-${currentMonth}`;
+            
+            // Check if page exists
+            let page = document.getElementById(pageId);
+            
+            if (!page) {
+                page = document.createElement('div');
+                page.className = 'month-page ' + data.theme;
+                page.id = pageId;
+                
+                const milestonesHTML = data.milestones.map(m => '<span class="milestone">' + m + '</span>').join('');
+                
+                const pageWrapper = document.createElement('div');
+                pageWrapper.className = 'page-wrapper';
+
+                const positions = [
+                    {col: 1, row: 1}, {col: 3, row: 1},
+                    {col: 1, row: 2}, {col: 3, row: 2}
+                ];
+
+                positions.forEach((pos, i) => {
+                    const slotId = `slot-${currentYear}-${currentMonth}-${i + 1}`;
+                    const savedComment = localStorage.getItem(`comment-${currentYear}-${currentMonth}-${i + 1}`) || '';
+                    
+                    const photoSlot = document.createElement('div');
+                    photoSlot.className = 'photo-slot';
+                    photoSlot.id = slotId;
+                    photoSlot.style.gridColumn = pos.col;
+                    photoSlot.style.gridRow = pos.row;
+                    
+                    photoSlot.innerHTML = createPhotoSlotHTML(currentYear, currentMonth, i + 1, savedComment);
+                    pageWrapper.appendChild(photoSlot);
+                });
+
+                const savedCenterMsg = localStorage.getItem(`center-msg-${currentYear}-${currentMonth}`) || '';
+                
+                const centerContent = document.createElement('div');
+                centerContent.className = 'center-content';
+                centerContent.innerHTML = 
+                    '<div class="age-display">Year ' + currentYear + ' • ' + monthNames[currentMonth - 1] + '</div>' +
+                    '<div class="month-number">' + currentMonth + '</div>' +
+                    '<div class="month-icon">' + data.icon + '</div>' +
+                    '<div class="month-title">' + data.title + '</div>' +
+                    '<div class="growth-message">' + data.growth + '</div>' +
+                    '<div class="milestones">' + milestonesHTML + '</div>' +
+                    '<div class="center-message-area">' +
+                        '<div class="center-message-label">💝 Your special note:</div>' +
+                        '<textarea class="center-message-input" id="center-msg-' + currentYear + '-' + currentMonth + '" placeholder="Write your message..." rows="2" onchange="saveCenterMessage(' + currentYear + ',' + currentMonth + ')">' + savedCenterMsg + '</textarea>' +
+                        '<div class="saved-center-message" id="center-display-' + currentYear + '-' + currentMonth + '">' + (savedCenterMsg || '✨ No note yet') + '</div>' +
+                    '</div>' +
+                    createSparkles();
+                pageWrapper.appendChild(centerContent);
+
+                page.appendChild(pageWrapper);
+                mainContent.appendChild(page);
+                
+                // Load saved photos
+                loadPagePhotos(currentYear, currentMonth);
+            }
+
+            // Show only current page
+            document.querySelectorAll('.month-page').forEach(p => p.classList.remove('active'));
+            page.classList.add('active');
+        }
+
+        function createPhotoSlotHTML(year, month, slot, savedComment) {
+            const photoData = localStorage.getItem(`photo-${year}-${month}-${slot}`);
+            
+            if (photoData) {
+                return '<div class="photo-area">' +
+                    '<img src="' + photoData + '" alt="Photo">' +
+                    '<button class="remove-btn" onclick="removePhoto(event, ' + year + ', ' + month + ', ' + slot + ')">✕</button>' +
+                    '<div class="photo-badge">Photo ' + slot + '</div>' +
+                    '<div class="comment-overlay">' +
+                        '<textarea class="comment-input" id="comment-' + year + '-' + month + '-' + slot + '" placeholder="✨ Memory..." rows="2" onchange="saveComment(' + year + ',' + month + ',' + slot + ')">' + savedComment + '</textarea>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="saved-comment ' + (savedComment ? '' : 'empty') + '" id="display-' + year + '-' + month + '-' + slot + '">' + (savedComment || '💭 Add memory') + '</div>';
+            }
+            
+            return '<div class="photo-area">' +
+                '<input type="file" accept="image/*" onchange="handlePhoto(this, ' + year + ', ' + month + ', ' + slot + ')">' +
+                '<div class="photo-badge">Photo ' + slot + '</div>' +
+                '<div class="camera-icon">' + cameras[slot - 1] + '</div>' +
+                '<div class="add-text">Tap to add</div>' +
+                '<div class="comment-overlay">' +
+                    '<textarea class="comment-input" id="comment-' + year + '-' + month + '-' + slot + '" placeholder="✨ Memory..." rows="2" onchange="saveComment(' + year + ',' + month + ',' + slot + ')">' + savedComment + '</textarea>' +
+                '</div>' +
+            '</div>' +
+            '<div class="saved-comment ' + (savedComment ? '' : 'empty') + '" id="display-' + year + '-' + month + '-' + slot + '">' + (savedComment || '💭 Add memory') + '</div>';
+        }
+
+        function loadPagePhotos(year, month) {
+            for (let i = 1; i <= 4; i++) {
+                const photoData = localStorage.getItem(`photo-${year}-${month}-${i}`);
+                const savedComment = localStorage.getItem(`comment-${year}-${month}-${i}`) || '';
+                
+                if (photoData) {
+                    const slot = document.getElementById(`slot-${year}-${month}-${i}`);
+                    if (slot) {
+                        slot.innerHTML = createPhotoSlotHTML(year, month, i, savedComment);
+                    }
+                }
+            }
+        }
+
+        function createSparkles() {
+            let sparkles = '';
+            for (let i = 0; i < 5; i++) {
+                sparkles += '<div class="sparkle" style="top:' + (Math.random() * 100) + '%;left:' + (Math.random() * 100) + '%;animation-delay:' + (Math.random() * 2) + 's"></div>';
+            }
+            return sparkles;
+        }
+
+        function triggerHearts() {
+            const overlay = document.getElementById('heartsOverlay');
+            overlay.innerHTML = '';
+            const hearts = ['💕', '💗', '💖', '💝', '🌸', '🧸', '✨', '💫', '🌟', '💛'];
+            for (let i = 0; i < 30; i++) {
+                const heart = document.createElement('div');
+                heart.className = 'heart';
+                heart.textContent = hearts[Math.floor(Math.random() * hearts.length)];
+                heart.style.left = Math.random() * 100 + '%';
+                heart.style.animationDelay = Math.random() * 1.5 + 's';
+                heart.style.fontSize = (14 + Math.random() * 20) + 'px';
+                overlay.appendChild(heart);
+            }
+            setTimeout(() => { overlay.innerHTML = ''; }, 4000);
+        }
+
+        function handlePhoto(input, year, month, slot) {
+            const file = input.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const slotEl = document.getElementById(`slot-${year}-${month}-${slot}`);
+                    const savedComment = localStorage.getItem(`comment-${year}-${month}-${slot}`) || '';
+                    
+                    slotEl.innerHTML = createPhotoSlotHTML(year, month, slot, savedComment);
+                    localStorage.setItem(`photo-${year}-${month}-${slot}`, e.target.result);
+                    
+                    // Update the slot with the image
+                    slotEl.innerHTML = '<div class="photo-area">' +
+                        '<img src="' + e.target.result + '" alt="Photo">' +
+                        '<button class="remove-btn" onclick="removePhoto(event, ' + year + ', ' + month + ', ' + slot + ')">✕</button>' +
+                        '<div class="photo-badge">Photo ' + slot + '</div>' +
+                        '<div class="comment-overlay">' +
+                            '<textarea class="comment-input" id="comment-' + year + '-' + month + '-' + slot + '" placeholder="✨ Memory..." rows="2" onchange="saveComment(' + year + ',' + month + ',' + slot + ')">' + savedComment + '</textarea>' +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="saved-comment ' + (savedComment ? '' : 'empty') + '" id="display-' + year + '-' + month + '-' + slot + '">' + (savedComment || '💭 Add memory') + '</div>';
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function removePhoto(event, year, month, slot) {
+            event.stopPropagation();
+            const slotEl = document.getElementById(`slot-${year}-${month}-${slot}`);
+            const savedComment = localStorage.getItem(`comment-${year}-${month}-${slot}`) || '';
+            
+            slotEl.innerHTML = createPhotoSlotHTML(year, month, slot, savedComment);
+            localStorage.removeItem(`photo-${year}-${month}-${slot}`);
+        }
+
+        function saveComment(year, month, slot) {
+            const comment = document.getElementById(`comment-${year}-${month}-${slot}`).value;
+            localStorage.setItem(`comment-${year}-${month}-${slot}`, comment);
+            
+            const display = document.getElementById(`display-${year}-${month}-${slot}`);
+            if (display) {
+                display.textContent = comment || '💭 Add memory';
+                display.className = 'saved-comment' + (comment ? '' : ' empty');
+            }
+        }
+
+        function saveCenterMessage(year, month) {
+            const msg = document.getElementById(`center-msg-${year}-${month}`).value;
+            localStorage.setItem(`center-msg-${year}-${month}`, msg);
+            
+            const display = document.getElementById(`center-display-${year}-${month}`);
+            if (display) {
+                display.textContent = msg || '✨ No note yet';
+            }
+        }
+
+        // Initialize
+        renderCurrentPage();
+        setTimeout(triggerHearts, 500);
+    </script>
+</body>
+</html>
